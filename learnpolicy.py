@@ -86,6 +86,7 @@ def set_up(envname):
         "K" :K, #number of initial states for which we optimize
         "action_dim": 1, #original: Dimension of action space
         "state_dim":1,
+        "gp_dim":10,
     }
 
     plant = Plant(envname = envname,dt = dt,)
@@ -117,16 +118,19 @@ Sigma = np.zeros((params["N"], 1))
 
 #1.initialization
 plant, policy, cost, dynmodel, params= setup("envname")
-kernel = GPy.kern.RBF(input_dim = )
+kernel = GPy.kern.RBF(input_dim = params["gp_dim"])
 env = gym.make("DoubleCartPole-v0")
 env.reset()
 #2.initial rollout
-xx = np.zeros((params["max_step"],))
+xx = np.zeros((params["max_step"],params["state_dim"]))
 uu = np.random.normal(np.zeros(params["action_dim"]),np.eye(np.zeros(param["action_dim"])))
 for t in range(params["max_step"]):
-    xx[t],reward,done,info = env.step(uu[t])
+    xx[t],reward,_,_ = env.step(uu[t])
+yy = xx[1:,:] -x[:-1,:]
+xx = np.concatenate((xx,uu),axis= 0)
 
-np.concatenate(np.)
+x.append(xx)
+y.append(yy)
 
 
 
