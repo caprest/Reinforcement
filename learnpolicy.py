@@ -8,37 +8,61 @@ def madadame(*args):
     print("yet to be implemented")
     return 0
 
+
+
+
 class Policy():
-    p = np.exp
+    def __init__(self, **kwargs,params):
+        maxU = 1
+        pass
+        params = params
+
+    def minimize(self,opt,model):
+        if opt["model"] == "BFGS":
+            self.BFGS()
+        else:
+            pass
+
+
+    def BFGS(self):
+        x = x0
+        fx = fx0
+        r = -dfx0
+        H = np.eye(x0.shape[0])
+        while i < abs(p.length):
+
+    def set_plant(self,gpmodel):
+        plant = gpmodel
+
+    def value(self):
+        for t in range(prams["max_step"]):
+            plant.predict("")
+            #caliculate_cost
+            plant.
+
+
+
+
 
 class Plant():
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         dt = kwargs["dt"]
         envname = kwargs["envname"]
-
 
     def dynamics(self):
         return 0
 
-    def
 
 class Cost():
-    def __init__(self,function):
+    def __init__(self, function):
         fcn = function
 
+
 class Dynmodel():
-    def __init__(self,fcn,train,):
+    def __init__(self, fcn, train, ):
         fcn = fcn
         train = train
 
-class Opt():
-    def __init__(self):
-        length = 150
-        MFEPLS = 30
-        verbosity = 1
-        method = "BFGS"
-
-class Env():
 
 
 
@@ -46,7 +70,8 @@ class Env():
 def minimize(X, F, p, *args):
     f = (F, X)
     fx, dfx = f(X)
-    return X, fX, i
+    i = 0
+    return X, fx, i
 
 
 def calcCost(cost, M, S):
@@ -59,54 +84,56 @@ def calcCost(cost, M, S):
     return L, sL
 
 
-
-def set_up(envname):
-    dt =  0.05,
-    T  =  5,
-    H =  np.ceil(T/dt)
+def setup(envname):
+    dt = 0.05
+    T = 5
+    H = np.ceil(T / dt)
     maxH = H
     nc = 200
-    s = np.array([0.1,0.1,0.1,0.1,0.01,0.01])**2
+    s = np.array([0.1, 0.1, 0.1, 0.1, 0.01, 0.01]) ** 2
     S0 = np.diag(s)
-    mu0 = np.array([0,0,0,0,pi,pi])
+    mu0 = np.array([0, 0, 0, 0, pi, pi])
     N = 40
     J = 1
     K = 1
+    env = gym.make(envname)
+    state_dim = env.env.state.shape[0]
+    env.reset()
     env_param = {
-        "dt" :dt, #[s] sampling time
-        "max_step" :T,  # [s] prediction time
-        "H" : H, # number of prediction step
-        "maxH" :maxH, # max pred horizon
-        "nc" : nc,
-        "s":s,  #initial state variances
-        "S0" :S0,
+        "dt": dt,  # [s] sampling time
+        "max_time": T,  # [s] prediction time
+        "max_step": H,  # number of prediction step
+        "maxH": maxH,  # max pred horizon
+        "nc": nc,
+        "s": s,  # initial state variances
+        "S0": S0,
         "mu0": mu0,
-        "num_ps" :N, #number of policy search
-        "num_im" :J, #initial (random) trajectories, each of length H
-        "K" :K, #number of initial states for which we optimize
-        "action_dim": 1, #original: Dimension of action space
-        "state_dim":1,
-        "gp_dim":10,
+        "num_iter": N,  # number of policy searches & GP
+        "num_im": J,  # initial (random) trajectories, each of length H
+        "K": K,  # number of initial states for which we optimize
+        "action_dim": 1,  # original: Dimension of action space
+        "state_dim": state_dim,
+        "gp_dim": 10,
     }
 
-    plant = Plant(envname = envname,dt = dt,)
+    plant = Plant(envname=envname, dt=dt, )
     policy = Policy()
     cost = Cost(madadame)
-    dynmodel = Dynmodel()
-    opt = Opt()
-    return plant, policy, cost, dynmodel, opt,env_param
+    opt = {
+        "length":150,
+        "MFEPLS":30,
+        "verbosity":1,
+        "method":"BFGS",
+    }
+    return plant, policy, cost, opt, env_param, env
 
-def gaussian(mean,S,n):
+
+def gaussian(mean, S, n):
     return mean + np.linalg.cholesky(S) * np.random.rand(n)
 
-def rollout(start,policy,H,plant,cost):
-    for i in range(H):
-        s = x(i,dyno).T
 
-    return x, y, latent
 
-x = []
-y = []
+"""
 fantasy = {
     "mean" : np.zeros((1, params["N"])),
     "std" : np.zeros((1, params["N"]))
@@ -115,30 +142,26 @@ realCost =  np.zeros((1, params["N"]))
 M = np.zeros((params["N"], 1))
 Sigma = np.zeros((params["N"], 1))
 #TODO latentがどこで定義されているかわからん
+"""
+# 1.initialization
+envname = "DoubleCartPole-v0"
+plant, policy, cost, opt,params, env = setup(envname)
+kernel = GPy.kern.RBF(input_dim=params["action_dim"] + params["state_dim"])
 
-#1.initialization
-plant, policy, cost, dynmodel, params= setup("envname")
-kernel = GPy.kern.RBF(input_dim = params["gp_dim"])
-env = gym.make("DoubleCartPole-v0")
-env.reset()
-#2.initial rollout
-xx = np.zeros((params["max_step"],params["state_dim"]))
-uu = np.random.normal(np.zeros(params["action_dim"]),np.eye(np.zeros(param["action_dim"])))
+# 2.initial rollout
+x = np.zeros((params["max_step"], params["state_dim"]))
+#uu = np.random.normal(np.zeros(params["action_dim"]), np.eye(params["action_dim"])) for i in range(["max_step"])
+uu = np.random.rand(params["max_step"],params["action_dim"])
 for t in range(params["max_step"]):
-    xx[t],reward,_,_ = env.step(uu[t])
-yy = xx[1:,:] -x[:-1,:]
-xx = np.concatenate((xx,uu),axis= 0)
+    xtemp, reward, _, _ = env.step(uu[t,:])
+    x[t,:] = xtemp.ravel()
+y = x[1:, :] - x[:-1, :]
+x[:-1,:]
+# 3. Controlled learning (N iterations)
+for j in range(params["num_iter"]):
+    model = GPy.models.GPRegression(x.T, y.T, kernel)
+    opt["fh"] = 1
+    policy.minimize(opt,model)
 
-x.append(xx)
-y.append(yy)
-
-
-
-
-
-opt.fh = 1
-policy.p, fx3 = minimize(policy.p, value, opt, mu0Sim, S0Sim,
-                         dynmodel, policy, plant, cost, H)
-
-M[j], Sigma[j] = pred(policy, plant, dynmodel, mu0Sim[:, 0], S0Sim, H)
-fantasy.mean[j], fantasy.std[j] = calc
+    M[j], Sigma[j] = pred(policy, plant, dynmodel, mu0Sim[:, 0], S0Sim, H)
+    fantasy.mean[j], fantasy.std[j] = calc
