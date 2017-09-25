@@ -8,14 +8,52 @@ def madadame(*args):
     print("yet to be implemented")
     return 0
 
+def squashing(x):
+    return (9*np.sin(x) + np.sin(3*x))/8
+
+
+class RBF():
+    def __init__(self,input_dim,kernel_dim,w = None,mu =None,lam =None):
+        kernel_dim = 5
+        input_dim = 7
+        if not w:
+            w = np.ones((1,k))
+        else:
+            w = w
+        if not mu:
+            mu = np.zeros((kernel_dim,1,input_dim))
+        else:
+            mu = mu
+        if not lam:
+            lam = np.tile(np.eye(input_dim),(kernel_dim,1)).reshape(kernel_dim,input_dim,input_dim)
+        else:
+            lam = lam
+
+    def prop(self,x):
+        dif = self.mu - x.reshape(self.input_dim,1) #broadcasting
+        return np.matmul(self.w,np.exp(np.matmul(dif.transpose(0,2,1),np.matmul(self.lam,dif)).reshape(-1)))
+
 
 
 
 class Policy():
-    def __init__(self, **kwargs,params):
+    def __init__(self, **kwargs,env_params):
         maxU = 1
         pass
         params = params
+        gamma = 1
+        m0 = env_params["mu0"]
+        S0 = env_params["S0"]
+        k = 5 # kernel_dim
+        self.w = np.ones((1,k))
+        self.mu = np.zeros((,1,env_params["state_dim"]))
+        self.lam = np.eye((1,env_params["state_dim"]))
+        self.rbf = RBF(input_dim = env_params["state_dim"],kernel_dim  =5)
+
+    def get_policy(self,x):
+        dif = x -self.mu
+        self.w * exp(dif.T * self.lam * dif)
+
 
     def minimize(self,opt,model):
         if opt["model"] == "BFGS":
@@ -35,10 +73,11 @@ class Policy():
         plant = gpmodel
 
     def value(self):
-        for t in range(prams["max_step"]):
-            plant.predict("")
+        m = self.m0
+        S = self.S0
+        for t in range(env_prams["max_step"]):
+            plant.predict()
             #caliculate_cost
-            plant.
 
 
 
