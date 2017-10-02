@@ -11,6 +11,46 @@ def madadame(*args):
 def squashing(x):
     return (9*np.sin(x) + np.sin(3*x))/8
 
+def saturating_cost(x):
+
+
+class saturating_cost(x):
+    dim = 4
+    mu = np.zeros(dim)
+    t_inv = np.zeros()
+    target = np.zeros(dim)
+    a = 1
+
+    def __init__(self,mu,a):
+        self.mu = mu
+        self.a = a
+
+    def distance(self,x):
+        return np.sum(np.matmul((x-self.target).T,self.T_inv,x-self.target))
+
+    def forward(self,x):
+        return 1 - np.exp(- 0.5 * self.distance(x))
+
+    def expectation(self,mu,Sigma):
+        temp = np.eye(self.dim)+np.matmul(Sigma,self.T_inv)
+        S1 = np.matmul(self.T_inv,temp)
+        dif = mu - self.target
+        return 1 - np.det(temp)*np.exp(-0.5 * np.matmul(dif.T,S1,dif))
+
+    def dif_exp(self,mu,Sigma):
+        temp = np.eye(self.dim)+np.matmul(Sigma,self.T_inv)
+        S1 = np.matmul(self.T_inv,temp)
+        exp = self.expectation(mu,Sigma)
+        dif = mu - self.target
+        self.dif_mu = -1.0 * exp * self.matmul(dif.T,S1)
+        self.dif_sigma = 1/2 * 
+
+
+        dif_sigma =
+
+
+
+
 
 class RBF():
     def __init__(self,input_dim,kernel_dim,w = None,mu =None,lam =None):
