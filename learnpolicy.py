@@ -4,6 +4,9 @@ import GPy
 import gym
 
 
+
+
+
 def madadame(*args):
     print("yet to be implemented")
     return 0
@@ -11,7 +14,6 @@ def madadame(*args):
 def squashing(x):
     return (9*np.sin(x) + np.sin(3*x))/8
 
-def saturating_cost(x):
 
 
 class saturating_cost(x):
@@ -20,7 +22,8 @@ class saturating_cost(x):
     t_inv = np.zeros()
     target = np.zeros(dim)
     a = 1
-
+    dif_cost_mu = np.zeros()
+    dif_cost_sigma = np.zeros()
     def __init__(self,mu,a):
         self.mu = mu
         self.a = a
@@ -37,16 +40,23 @@ class saturating_cost(x):
         dif = mu - self.target
         return 1 - np.det(temp)*np.exp(-0.5 * np.matmul(dif.T,S1,dif))
 
-    def dif_exp(self,mu,Sigma):
+    def calc_dif_cost(self,mu,Sigma):
         temp = np.eye(self.dim)+np.matmul(Sigma,self.T_inv)
         S1 = np.matmul(self.T_inv,temp)
         exp = self.expectation(mu,Sigma)
         dif = mu - self.target
         self.dif_mu = -1.0 * exp * self.matmul(dif.T,S1)
-        self.dif_sigma = 1/2 * 
+        self.dif_sigma = 0.5 * exp * np.matmul((np.matmul(S1,dif,dif.T)-np.eye(self.dim)),S1)
 
 
-        dif_sigma =
+
+    def dif_cost(self,T,num_param):
+        ret = np.zeros((T+1,1,num_param))
+        for t in range(0,T+1):
+            self.dif_exp(mu,Sigma)
+            ret[t,0,:] = dif_cost_mu[t]@self.dif_mu[t] + dif_cost_sigma@self.dif_cost
+
+
 
 
 
@@ -88,7 +98,8 @@ class Policy():
         self.w = np.ones((1,k))
         self.mu = np.zeros((,1,env_params["state_dim"]))
         self.lam = np.eye((1,env_params["state_dim"]))
-        self.rbf = RBF(input_dim = env_params["state_dim"],kernel_dim  =5)
+        self.rbf = RBF(input_dim = env_params["state_dim"],kernel_dim  = k)
+        self.num_param = 10 #temp
 
     def get_policy(self,x):
         dif = x -self.mu
@@ -100,7 +111,11 @@ class Policy():
             self.BFGS()
         else:
             pass
-
+    def policy_grad(self,dif_cost):
+        assert dif_cost.shape ==  (self.T+1,1,self.num_param)
+        gradient = np.sum(dif_cost,axis=0)
+        #\sum_t=0^T(d/d\phi(E(c_t))
+        return gradient
 
     def BFGS(self):
         x = x0
