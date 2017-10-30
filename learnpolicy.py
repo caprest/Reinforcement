@@ -5,12 +5,6 @@ import gym
 
 
 
-
-
-def madadame(*args):
-    print("yet to be implemented")
-    return 0
-
 def squashing(x):
     return (9*np.sin(x) + np.sin(3*x))/8
 
@@ -84,13 +78,98 @@ class RBF():
         return np.matmul(self.w,np.exp(np.matmul(dif.transpose(0,2,1),np.matmul(self.lam,dif)).reshape(-1)))
 
 
+def propagate_with_d():
+    """
+     function [Mnext, Snext, dMdm, dSdm, dMds, dSds, dMdp, dSdp] = ...
+     propagated(m, s, plant, dynmodel, policy)
+    
+     *Input arguments:*
+    
+       m                 mean of the state distribution at time t           [D x 1]
+       s                 covariance of the state distribution at time t     [D x D]
+       plant             plant structure
+       dynmodel          dynamics model structure
+       policy            policy structure
+    
+     *Output arguments:*
+    
+       Mnext             predicted mean at time t+1                         [E x 1]
+       Snext             predicted covariance at time t+1                   [E x E]
+       dMdm              output mean wrt input mean                         [E x D]
+       dMds              output mean wrt input covariance matrix         [E  x D*D]
+       dSdm              output covariance matrix wrt input mean        [E*E x  D ]
+       dSds              output cov wrt input cov                       [E*E x D*D]
+       dMdp              output mean wrt policy parameters                  [E x P]
+       dSdp              output covariance matrix wrt policy parameters  [E*E x  P]    
+    """
+
+
+
+
+def gTrig(mean,cov,idx,scale_vec = None):
+    """
+    saturating function (limiting output like  $ u_{max}sin(\pi^\{tilde}(x))$
+     m     mean vector of Gaussian                                    [ d       ]
+    v     covariance matrix                                          [ d  x  d ]
+    i     vector of indices of elements to augment                   [ I  x  1 ]
+    たぶんなんかのフラグなのだが、よくわからん
+    つまるところ角度を指定しなければならないところは、拡張する必要がある(sin,cos)で表現するため
+    e     (optional) scale vector; default: 1                        [ I  x  1 ]
+    ->そもそも thetaをsin\theta cos\thetaで書いているっぽい
+    出力としてはp(sin\theta,cos\theta)をめざす？
+    %   M     output means                                              [ 2I       ]
+    %   V     output covariance matrix                                  [ 2I x  2I ]
+    %   C     inv(v) times input-output covariance                      [ d  x  2I ]
+    %   dMdm  derivatives of M w.r.t m                                  [ 2I x   d ]
+    %   dVdm  derivatives of V w.r.t m                                  [4II x   d ]
+    %   dCdm  derivatives of C w.r.t m                                  [2dI x   d ]
+    %   dMdv  derivatives of M w.r.t v                                  [ 2I x d^2 ]
+    %   dVdv  derivatives of V w.r.t v                                  [4II x d^2 ]
+    %   dCdv  derivatives of C w.r.t v                                  [2dI x d^2 ]
+    :return: 
+    """
+"""
+d = length(m); I = length(i); Ic = 2*(1:I); Is = Ic-1;
+if nargin == 3, e = ones(I,1); else e = e(:); end; 
+ee = reshape([e e]',2*I,1);
+mi(1:I,1) = m(i); vi = v(i,i); vii(1:I,1) = diag(vi);     % short-hand notation
+
+M(Is,1) = e.*exp(-vii/2).*sin(mi); M(Ic,1) = e.*exp(-vii/2).*cos(mi);    % mean
+
+lq = -bsxfun(@plus,vii,vii')/2;
+ q = exp(lq);
+U1 = (exp(lq+vi)-q).*sin(bsxfun(@minus,mi,mi'));
+U2 = (exp(lq-vi)-q).*sin(bsxfun(@plus,mi,mi'));
+U3 = (exp(lq+vi)-q).*cos(bsxfun(@minus,mi,mi'));
+U4 = (exp(lq-vi)-q).*cos(bsxfun(@plus,mi,mi'));
+V(Is,Is) = U3 - U4; V(Ic,Ic) = U3 + U4; V(Is,Ic) = U1 + U2; 
+V(Ic,Is) = V(Is,Ic)'; V = ee*ee'.*V/2;                               % variance
+"""
+
+    d = mean.shape[0]
+    I = len(idx)
+    Ic = 2*np.arange(I)
+    Is = Ic-1
+    if not scale_vec:
+        scalevec = np.ones(I,1)
+    scale_vec2 = np.tile(scale_vec,(2,1)).reshape((2*I,1))
+    idx_mean = mean[i,0]
+    idx_cov = mean[i,:][:,i]
+    idx_cov2 = np.diag(idx_cov)
+
+
+
+
+
+
+
 
 
 class Policy():
     def __init__(self, **kwargs,env_params):
         maxU = 1
         pass
-        params = params
+        params = env_params
         gamma = 1
         m0 = env_params["mu0"]
         S0 = env_params["S0"]
